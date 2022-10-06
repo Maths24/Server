@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import os
+import socket
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +27,15 @@ SECRET_KEY = 'django-insecure-7^#a6^^c4q$_l1zkmd5!h35^jsq60^8-3#q30%9gqsb29yz0gy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+#Get IP-Address of local machine
+def get_ipaddress():
+    host_name = socket.gethostname()
+    ip_address = socket.gethostbyname(host_name)
+    return ip_address
+
+#WLAN2.4, LAN, 
+ALLOWED_HOSTS = ['192.168.178.55', '192.168.178.56', 'localhost', '127.0.0.1', '172.16.30.101']
 
 
 # Application definition
@@ -119,8 +129,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+#STATICFILEA_DIR = [
+#    BASE_DIR / 'static/'
+#]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

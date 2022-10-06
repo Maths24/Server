@@ -1,0 +1,103 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<html>
+  <head>
+    <!---->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function httpGet(url) {
+        var xmlHTTP =new XMLHttpRequest();
+        xmlHTTP.open("GET", url, false);
+        xmlHTTP.send(null);
+        return xmlHTTP.response;
+      }
+      
+
+      function drawChart() {
+
+        /*var data = google.visualization.arrayToDataTable([
+          ['Uhrzeit', 'Kundenzahl Schnitt', 'Kundenzahl', ],
+          ['9:00',  0, 1],
+          ['10:00',  11, 20],
+          ['12:00',  69, 30],
+          ['13:00',  66, 50],
+          ['14:00',  38, 55],
+          ['15:00',  67, 68],
+          ['16:00',  29, 40],
+          ['17:00',  10, 11]
+        ]);*/
+        var datafromApi = httpGet("testapi");
+        var dataforchart = JSON.parse(datafromApi);
+   
+        var data = google.visualization.arrayToDataTable(dataforchart);
+        
+        var options = {
+          title: 'Besucher in Laden',
+          hAxis: {title: 'Uhrzeit',  titleTextStyle: {color: '#333'}},
+          vAxis: {minValue: 0},
+          colors:['orange', 'red']
+        };
+
+        var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+        console.log("Draw Chart");
+
+      }
+
+      /*google.charts.load('current', {packages: ['corechart', 'bar']});
+google.charts.setOnLoadCallback(drawMultSeries);
+
+function drawMultSeries() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('timeofday', 'Uhrzeit');
+      data.addColumn('number', 'Kunden rein');
+      data.addColumn('number', 'Kunden raus');
+
+      data.addRows([
+        [{v: [8, 0, 0], f: '8 am'}, 3, 0],
+        [{v: [9, 0, 0], f: '9 am'}, 20, 7],
+        [{v: [10, 0, 0], f:'10 am'}, 40, 30],
+        [{v: [11, 0, 0], f: '11 am'}, 50, 40],
+        [{v: [12, 0, 0], f: '12 pm'}, 53, 47],
+        [{v: [13, 0, 0], f: '1 pm'}, 30, 20],
+        [{v: [14, 0, 0], f: '2 pm'}, 40, 35],
+        [{v: [15, 0, 0], f: '3 pm'}, 45, 36],
+        [{v: [16, 0, 0], f: '4 pm'}, 20, 40],
+        [{v: [17, 0, 0], f: '5 pm'}, 7, 30],
+      ]);
+
+      var options = {
+        title: 'Kunden rein/raus',
+        hAxis: {
+          title: 'Uhrzeit',
+          format: 'h:mm a',
+          viewWindow: {
+            min: [7, 30, 0],
+            max: [17, 30, 0]
+          }
+        },
+        vAxis: {
+          title: 'Zahl'
+        }
+      };
+
+      var chart = new google.visualization.ColumnChart(
+        document.getElementById('chart_div1'));
+
+      chart.draw(data, options);
+    }*/
+    </script>
+  </head>
+  <body>
+      <h1>Kundenfrequenz Analyse</h1>
+    <div id="chart_div" style="width: 100%; height: 500px;"></div>
+    </div>
+  </body>
+</html>
+
+{% endblock content%}
