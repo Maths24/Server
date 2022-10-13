@@ -6,7 +6,8 @@ from lcsupport import LCSupport
 from django.views.decorators import gzip
 from django.http import StreamingHttpResponse
 from django.http import JsonResponse
-
+from base import data
+from base.dbcontroller import DBController
 # Create your views here.
 
 #rooms = [
@@ -15,21 +16,66 @@ from django.http import JsonResponse
 #    {'id': 3, 'name': 'Frontend developer'},
 #]
 
+#---------------------HTML---------------------
 def landing(request):
-    return render(request, 'base/index.html')
+    d = data.Data()
+    gesamtKundenzahl = gesamtZahlHeute()
+    kundenInLaden = kundenzahlInLaden()
+    vergleichVorwoche = gesamtKundenzahl - vergleichVorwoche()
+    return render(request, 'base/index.html', {'gesamtKundenzahl': gesamtKundenzahl, 'kundenInLaden': kundenInLaden, 'vergleichVorwoche': vergleichVorwoche})
 
 def settings(request):
     return render(request, 'base/settings.html')
 
 def dataanalysis(request):
-    return render(request, 'base/datenanalyse.html')
+    d = data.Data()
+    return render(request, 'base/datenanalyse.html', {'data':d})
 
+#---------------------API---------------------
 def testapi(request):
     data = [['Uhrzeit', 'Kundenzahl Schnitt', 'Kundenzahl'], ['9:00',  1, 1], ['10:00',  2, 3], ['11:00',  19, 16], ['12:00',  67, 89], ['13:00',  50, 45], ['14:00',  50, 0], ['15:00',  36, 0]]
     #data = [['9:00',  1, 1], ['10:00',  2, 3], ['11:00',  17, 16], ['12:00',  7, 89], ['13:00',  0, 45]]
 
     return JsonResponse(data, safe=False)
 
+#---------------------Datenbankdaten aufbereiten---------------------
+def gesamtZahlHeute():
+    dbc = DBController()
+    #richtige Daten eintragen!!!!
+
+    data = dbc.query("select * from *table_name* where DATE(*datetime_column*) = curdate();")
+
+    gesamtZahlKunden = 0
+    letzterWert = 0
+
+    for d in data:
+        if (d[0] > letzterWert):
+            gesamtZahlKunden += 1
+        letzterWert = d[0]
+
+    return gesamtZahlKunden
+
+def kundenzahlInLaden():
+    dbc = DBController()
+    #richtige Daten eintragen!!!!
+    data = dbc.query("select * from *table_name* ORDER BY *id* DESC LIMIT 1;")
+
+    return data[0][0]
+
+def vergleichVorwoche():
+    dbc = DBController()
+    #richtige Daten eintragen!!!!
+    kundenzahlVorwocheData = dbc.query("select * from *table_name* where *datetime_column* between curdate() - interval 7 day + '00:00:00' and curdatetime() - interval 7 day")
+    gesamtZahlKundenVorwoche = 0
+    letzterWert = 0
+
+    for d in kundenzahlVorwocheData:
+        if (d[0] > letzterWert):
+            gesamtZahlKundenVorwoche += 1
+        letzterWert = d[0]
+
+    return gesamtZahlKundenVorwoche
+#---------------------Livecamera---------------------
 @gzip.gzip_page
 def livecamera(request):
     try:
