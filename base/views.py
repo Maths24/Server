@@ -21,8 +21,8 @@ def landing(request):
     d = data.Data()
     gesamtKundenzahl = gesamtZahlHeute()
     kundenInLaden = kundenzahlInLaden()
-    vergleichVorwoche = gesamtKundenzahl - vergleichVorwoche()
-    return render(request, 'base/index.html', {'gesamtKundenzahl': gesamtKundenzahl, 'kundenInLaden': kundenInLaden, 'vergleichVorwoche': vergleichVorwoche})
+    vergleich = gesamtKundenzahl - vergleichVorwoche()
+    return render(request, 'base/index.html', {'gesamtKundenzahl': gesamtKundenzahl, 'kundenInLaden': kundenInLaden, 'vergleichVorwoche': vergleich})
 
 def settings(request):
     return render(request, 'base/settings.html')
@@ -36,14 +36,22 @@ def testapi(request):
     data = [['Uhrzeit', 'Kundenzahl Schnitt', 'Kundenzahl'], ['9:00',  1, 1], ['10:00',  2, 3], ['11:00',  19, 16], ['12:00',  67, 89], ['13:00',  50, 45], ['14:00',  50, 0], ['15:00',  36, 0]]
     #data = [['9:00',  1, 1], ['10:00',  2, 3], ['11:00',  17, 16], ['12:00',  7, 89], ['13:00',  0, 45]]
 
-    return JsonResponse(data, safe=False)
+    return JsonResponse(analyseDaten(), safe=False)
 
 #---------------------Datenbankdaten aufbereiten---------------------
+def analyseDaten():
+    dbc = DBController()
+    data = dbc.query("select TIME(Datum), kundenzahl from daten where DATE(Datum) = curdate();")
+    dataArray = [['Uhrzeit', 'Kundenzahl']]
+    for d in data:
+        dataArray.append([str(d[0]), d[1]])
+
+    return dataArray
+
 def gesamtZahlHeute():
     dbc = DBController()
-    #richtige Daten eintragen!!!!
 
-    data = dbc.query("select * from *table_name* where DATE(*datetime_column*) = curdate();")
+    data = dbc.query("select kundenzahl from daten where DATE(Datum) = curdate();")
 
     gesamtZahlKunden = 0
     letzterWert = 0
@@ -57,15 +65,14 @@ def gesamtZahlHeute():
 
 def kundenzahlInLaden():
     dbc = DBController()
-    #richtige Daten eintragen!!!!
-    data = dbc.query("select * from *table_name* ORDER BY *id* DESC LIMIT 1;")
-
+    data = dbc.query("select kundenzahl from daten ORDER BY id DESC LIMIT 1;")
+    if len(data) == 0:
+        return 0
     return data[0][0]
 
 def vergleichVorwoche():
     dbc = DBController()
-    #richtige Daten eintragen!!!!
-    kundenzahlVorwocheData = dbc.query("select * from *table_name* where *datetime_column* between curdate() - interval 7 day + '00:00:00' and curdatetime() - interval 7 day")
+    kundenzahlVorwocheData = dbc.query("select kundenzahl from daten where Datum between curdate() - interval 7 day + '00:00:00' and now() - interval 7 day")
     gesamtZahlKundenVorwoche = 0
     letzterWert = 0
 
