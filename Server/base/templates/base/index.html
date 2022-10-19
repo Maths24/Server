@@ -1,0 +1,22 @@
+{% extends 'main.html' %} {% block content %}
+
+<div class="title">FrequenzmesserIK</div>
+<div class="date">Donnerstag, 29. September</div>
+
+<div class="container">
+  <div class="box_big">
+    <table width="90%" , height="90%">
+      <tr class="numberrow">
+        <th class="number">{{gesamtKundenzahl}}</th>
+        <th class="number">{{kundenInLaden}}</th>
+        <th class="number">{{vergleichVorwoche}}</th>
+      </tr>
+      <tr class="descriptionrow">
+        <td class="text">Kunden<br />gesamt</td>
+        <td class="text">Kunden<br />gerade</td>
+        <td class="text">Vergleich</td>
+      </tr>
+    </table>
+  </div>
+</div>
+{% endblock content%}
